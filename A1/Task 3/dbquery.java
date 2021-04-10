@@ -75,7 +75,7 @@ public class dbquery {
 
     private static void stringSearcher(String searchString, List<List<String>> records) {
         for (List<String> record : records) {
-            String sdt_name = record.get(2) + "_" + record.get(1);
+            String sdt_name = record.get(2) + record.get(1);
 
             if (sdt_name.contains(searchString)) {
                 System.out.println(record.toString());
