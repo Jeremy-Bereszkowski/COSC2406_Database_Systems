@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Comparator;
 
 public class DataNode extends Node {
     private final List<DataIndex> indexes = new ArrayList<>();
@@ -14,4 +15,11 @@ public class DataNode extends Node {
     Boolean containsIndex(DataIndex index) { return this.indexes.contains(index); }
     List<DataIndex> getIndexes() { return Collections.unmodifiableList(this.indexes); }
     void removeIndex(DataIndex index) { this.indexes.remove(index); }
+    void sortIndexes() {
+        Collections.sort(indexes, new SortByIndex());
+    }
+
+    class SortByIndex implements Comparator<Student> {
+        public int compare(DataIndex a, DataIndex b) { return a.index - b.index; }
+    }
 }

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class tree {
-
     private static String dateStringBuilder(String date) {
         String year = date.substring(0, 4);
         String month = date.substring(4, 6);
@@ -21,41 +20,41 @@ public class tree {
         return String.format("%s/%s/%s %s:00:00 %s", month, day, year, hour, twelveHour);
     }
 
-    private static List<List<String>> readPage(String fileName, int pageOffset, int pageSize) {
+    private static List<DataNode> readHeapFile(String fileName, int pageSize) {
         int RECORD_LENGTH = 56;
-        List<List<String>> records = new ArrayList<>();
+        List<DataNode> dataNodes = new ArrayList<>();
 
         try {
             DataInputStream inputStream = new DataInputStream(new FileInputStream(fileName));
+            int pageCounter = 0;
 
-            inputStream.skip(pageOffset * pageSize);
+            // Read whole file
+            while (inputStream.available() > 0) {
 
-            int bytesRead = 0;
+                int bytesRead = 0;
+                DataNode node = new DataNode();
 
-            // Read single page of data
-            while (inputStream.available() > 0 && bytesRead + RECORD_LENGTH < pageSize) {
-                List<String> record = new ArrayList<>();
+                // Read single page of data - add indexes to node
+                while (bytesRead + RECORD_LENGTH < pageSize) {
+                    int record_id = inputStream.readInt();
 
-                int record_id = inputStream.readInt();
+                    // Skip blank records
+                    if (record_id == 0) continue;
 
-                // Skip blank records
-                if (record_id == 0)
-                    continue;
+                    String id = String.format("%d", recordb_id);
+                    String dateString = dateStringBuilder(String.format("%d", inputStream.readInt()));
 
-                record.add(String.format("%d", record_id));
-                record.add(dateStringBuilder(String.format("%d", inputStream.readInt())));
-                record.add(String.format("%d", inputStream.readInt()));
+                    String index = id.concat(dateString);
+                    int recordOffset = bytesRead / RECORD_LENGTH;
 
-                byte[] sensor_name = new byte[40];
-                for (int i = 0; i < 40; i++) {
-                    sensor_name[i] = inputStream.readByte();
+                    node.addIndex(new DataIndex(index, pageCounter, recordOffset));
+                    bytesRead += RECORD_LENGTH;
                 }
 
-                record.add(new String(sensor_name, StandardCharsets.UTF_8));
-                record.add(String.format("%d", inputStream.readInt()));
-
-                records.add(record);
-                bytesRead += RECORD_LENGTH;
+                //Sort indexes and add node to list
+                pageCounter++;
+                node.sortIndexes();
+                dataNodes.add(node);
             }
 
             inputStream.close();
@@ -86,15 +85,8 @@ public class tree {
         // Start timer
         Instant start = Instant.now();
 
-        // Read in first page
-        int pageCounter = 0;
-        List<List<String>> records = readPage(heapFile, pageCounter++, pageSize);
-
-        // Continue searching and reading pages until all pages read
-        while (records.size() > 0) {
-            stringSearcher(searchText, records);
-            records = readPage(heapFile, pageCounter++, pageSize);
-        }
+        // Read in heap file
+        List<DataNode> records = readHeapFile(heapFile, pageCounter++, pageSize);
 
         // Stop timer
         Instant finish = Instant.now();
