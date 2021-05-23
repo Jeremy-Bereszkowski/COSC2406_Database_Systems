@@ -20,6 +20,6 @@ public class DataNode extends Node {
     }
 
     class SortByIndex implements Comparator<Student> {
-        public int compare(DataIndex a, DataIndex b) { return a.index - b.index; }
+        public int compare(DataIndex a, DataIndex b) { return a.getIndex() - b.getIndex(); }
     }
 }
