@@ -25,7 +25,7 @@ public class DataNode extends Node {
 
     @Override
     public String toString() {
-        StringBuilder string = new StringBuilder("TreeNode: {\n");
+        StringBuilder string = new StringBuilder("DataNode: {\n");
         string.append("\tindex: {\n");
         for (Index index : indexes) {
             string.append("\t\tindexes: \"").append(index.getIndex()).append("\",\n");

@@ -157,6 +157,41 @@ public class tree {
     }
 
     private static void searchTree(TreeNode rootNode, String searchText) {
+        List<Index> matchingIndexes = new ArrayList<>();
+
+        Node node = rootNode;
+
+        while (node.getChildren().size() != 0) {
+            Boolean updated = false;
+            //Search through current nodes indexes
+            for (int i = 0; i < node.getIndexes().size(); i++) {
+                // If less, than set node to current child node
+                if (searchText.compareTo(node.getIndexes().get(i).getIndex()) < 0) {
+                    node = node.getChildren().get(i);
+                    System.out.println("HELLLO");
+                    updated = true;
+                    break;
+                }
+            }
+
+            //Set node to last child
+            if (!updated) {
+                System.out.println("HELLLO1111");
+                node = node.getChildren().get(node.getChildren().size()-1);
+            }
+        }
+
+        // Print all indexes in relevant leaf
+        for (Index index : node.getIndexes()) {
+            if (index.getIndex().equals(searchText)) {
+                matchingIndexes.add(index);
+            }
+        }
+
+        System.out.println(matchingIndexes);
+    }
+
+    private static void readRecordFromFile(int pageOffset, int recordOffset) {
 
     }
 
@@ -172,6 +207,7 @@ public class tree {
         // Build Tree
         TreeNode rootNode = buildTree(heapFile, pageSize);
 
+        //Search Tree
         searchTree(rootNode, searchText);
 
         // Stop timer
