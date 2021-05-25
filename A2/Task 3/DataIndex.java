@@ -1,19 +1,20 @@
-public class DataIndex {
-    private String index;
+public class DataIndex extends Index {
     private int pageOffset, recordOffset;
 
     DataIndex(String index, int pageOffset, int recordOffset) {
-        this.index = index;
+        super(index);
         this.pageOffset = pageOffset;
         this.recordOffset = recordOffset;
     }
-
-    public String getIndex() { return index; }
-    public void setIndex(String index) { this.index = index; }
 
     public int getPageOffset() { return pageOffset; }
     public void setPageOffset(int pageOffset) { this.pageOffset = pageOffset; }
 
     public int getRecordOffset() { return recordOffset; }
     public void setRecordOffset(int recordOffset) { this.recordOffset = recordOffset; }
+
+    @Override
+    public String toString() {
+        return "\n\t\t\t" + super.getIndex() + ", pageOffset=" + pageOffset + ", recordOffset=" + recordOffset;
+    }
 }

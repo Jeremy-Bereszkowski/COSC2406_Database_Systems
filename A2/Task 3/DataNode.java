@@ -13,13 +13,30 @@ public class DataNode extends Node {
 
     void addIndex(DataIndex index) { this.indexes.add(index); }
     Boolean containsIndex(DataIndex index) { return this.indexes.contains(index); }
-    List<DataIndex> getIndexes() { return Collections.unmodifiableList(this.indexes); }
+    public List<Index> getIndexes() { return Collections.unmodifiableList(this.indexes); }
     void removeIndex(DataIndex index) { this.indexes.remove(index); }
     void sortIndexes() {
         Collections.sort(indexes, new SortByIndex());
     }
 
-    class SortByIndex implements Comparator<Student> {
-        public int compare(DataIndex a, DataIndex b) { return a.getIndex() - b.getIndex(); }
+    class SortByIndex implements Comparator<DataIndex> {
+        public int compare(DataIndex a, DataIndex b) { return a.getIndex().compareTo(b.getIndex()); }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder string = new StringBuilder("TreeNode: {\n");
+        string.append("\tindex: {\n");
+        for (Index index : indexes) {
+            string.append("\t\tindexes: \"").append(index.getIndex()).append("\",\n");
+        }
+        string.append("\t},\n");
+        string.append("\tchildren: {\n");
+        for (Node child : super.getChildren()) {
+            string.append("\t\tindexes: ").append(child.getIndexes()).append(",\n");
+        }
+        string.append("\t}\n");
+        string.append("}\n");
+        return string.toString();
     }
 }
