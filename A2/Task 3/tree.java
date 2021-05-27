@@ -26,11 +26,12 @@ public class tree {
             twelveHour = "PM";
         }
 
-        return String.format("%s/%s/%s %s:00:00 %s", month, day, year, hour, twelveHour);
+        return String.format("%s/%s/%s %s:00:00 %s", year, month, day, hour, twelveHour);
     }
 
-    private static List<DataNode> readHeapFile(String fileName, int pageSize) {
+    private static List<DataNode> readHeapFile(String fileName, int pageSize, String indexType) {
         List<DataNode> dataNodes = new ArrayList<>();
+        int records = 0;
 
         try {
             DataInputStream inputStream = new DataInputStream(new FileInputStream(fileName));
@@ -39,15 +40,18 @@ public class tree {
             // Read whole file
             while (inputStream.available() > 0) {
                 int bytesRead = 0;
+                int recordOffset = 0;
                 DataNode node = new DataNode();
 
                 // Read single page of data - add indexes to node
-                while (bytesRead + RECORD_LENGTH < pageSize) {
+                do {
                     int record_id = inputStream.readInt();
 
+                    // If record_id is 0, rest of page is empty, read remaining empty bytes
                     if (record_id == 0) {
-                        bytesRead += RECORD_LENGTH;
-                        break;
+                        //Remaining bytes minus single int read for record_id
+                        inputStream.readNBytes(pageSize - bytesRead - 4);
+                        continue;
                     }
 
                     String recordId = String.format("%d", record_id);
@@ -62,14 +66,16 @@ public class tree {
                     String sensorName = new String(sensor_name, StandardCharsets.UTF_8);
                     String hourlyCounts = String.format("%d", inputStream.readInt());
 
-                    String index = recordId.concat(dateString);
-                    int recordOffset = bytesRead / RECORD_LENGTH;
+                    String index;
+                    if ("date".equals(indexType)) index = dateString;
+                    else index = recordId.concat(dateString);
 
-                    node.addIndex(new DataIndex(index, pageCounter/5, recordOffset));
-                    bytesRead += RECORD_LENGTH;
-                }
+                    node.addIndex(new DataIndex(index, pageCounter, recordOffset++));
+                    records++;
 
-                //If page contained nodes
+                } while ((bytesRead += RECORD_LENGTH) < pageSize);
+
+                //If page contained records
                 if (node.getIndexes().size() > 0) {
                     node.sortIndexes();
                     dataNodes.add(node);
@@ -84,6 +90,15 @@ public class tree {
             e.printStackTrace();
         }
 
+        int records2 = 0;
+        for (DataNode node : dataNodes) {
+            records2 += node.getIndexes().size();
+        }
+
+        System.out.println(records);
+        System.out.println(records2);
+        System.out.println(dataNodes.size());
+
         return dataNodes;
     }
 
@@ -91,19 +106,17 @@ public class tree {
         List<TreeNode> layer = new ArrayList<>();
 
         for (int i = 0; i < nodes.size(); ) {
-            for (int j = 0; j < MAX_INDEX_PER_NODE + 1 && i < nodes.size(); ) {
-                TreeNode node = new TreeNode();
+            TreeNode node = new TreeNode();
 
-                node.addChild(nodes.get(i++));
+            node.addChild(nodes.get(i++));
 
-                for (int k = 1; k < MAX_INDEX_PER_NODE + 1 && i < nodes.size(); j++, i++, k++) {
-                    // Add child to new node, add index to new node
-                    node.addChild(nodes.get(i));
-                    node.addIndex(nodes.get(i).getIndexes().get(0));
-                }
-
-                layer.add(node);
+            for (int k = 1; k < MAX_INDEX_PER_NODE + 1 && i < nodes.size(); i++, k++) {
+                // Add child to new node, add index to new node
+                node.addChild(nodes.get(i));
+                node.addIndex(nodes.get(i).getIndexes().get(0));
             }
+
+            layer.add(node);
         }
 
         return layer;
@@ -113,36 +126,36 @@ public class tree {
         List<TreeNode> layer = new ArrayList<>();
 
         for (int i = 0; i < nodes.size(); ) {
-            for (int j = 0; j < MAX_INDEX_PER_NODE + 1; ) {
-                TreeNode node = new TreeNode();
+            TreeNode node = new TreeNode();
 
-                node.addChild(nodes.get(i++));
+            node.addChild(nodes.get(i++));
 
-                for (int k = 1; k < MAX_INDEX_PER_NODE + 1 && i < nodes.size(); j++, i++, k++) {
-                    // Add child to new node, add index to new node
-                    node.addChild(nodes.get(i));
-                    node.addIndex(new Index(nodes.get(i).getIndexes().get(0).getIndex()));
-                }
-
-                layer.add(node);
+            for (int k = 1; k < MAX_INDEX_PER_NODE + 1 && i < nodes.size(); i++, k++) {
+                // Add child to new node, add index to new node
+                node.addChild(nodes.get(i));
+                node.addIndex(new Index(nodes.get(i).getIndexes().get(0).getIndex()));
             }
+
+            layer.add(node);
         }
 
         return layer;
     }
 
-    private static void chainDataNodes(List<DataNode> nodes) {
+    private static List<DataNode> chainDataNodes(List<DataNode> nodes) {
         for (int i = 0; i < nodes.size()-1; i++) {
             nodes.get(i).setNext(nodes.get(i+1));
         }
+
+        return nodes;
     }
 
-    private static TreeNode buildTree(String fileName, int pageSize) {
+    private static TreeNode buildTree(String fileName, int pageSize, String indexType) {
         // Read in heap file to data nodes
-        List<DataNode> nodes = readHeapFile(fileName, pageSize);
+        List<DataNode> nodes = readHeapFile(fileName, pageSize, indexType);
 
         // Chain data nodes
-        chainDataNodes(nodes);
+        nodes = chainDataNodes(nodes);
 
         // Build base layer of tree
         List<TreeNode> baseLayer = buildBase(nodes);
@@ -168,27 +181,68 @@ public class tree {
                 // If less, than set node to current child node
                 if (searchText.compareTo(node.getIndexes().get(i).getIndex()) < 0) {
                     node = node.getChildren().get(i);
-                    System.out.println("HELLLO");
                     updated = true;
                     break;
                 }
             }
 
             //Set node to last child
-            if (!updated) {
-                System.out.println("HELLLO1111");
-                node = node.getChildren().get(node.getChildren().size()-1);
-            }
+            if (!updated) node = node.getChildren().get(node.getChildren().size()-1);
         }
 
-        // Print all indexes in relevant leaf
+//        Node node2 = node;
+//        while (node2 != null) {
+//            System.out.println(util.listToString(node2.getIndexes()));
+//            node2 = node2.getNext();
+//        }
+
+        // Get index of first matching record
+        int recordIndex = 0;
         for (Index index : node.getIndexes()) {
-            if (index.getIndex().equals(searchText)) {
-                matchingIndexes.add(index);
+            String [] searchTerms = searchText.split(" ");
+            boolean match = true;
+
+            // Search for each spaced separated string in the search string
+            for (String term : searchTerms) {
+                if (!index.getIndex().contains(term)) {
+                    match = false;
+                    break;
+                }
+            }
+
+            // If a match => set recordIndex
+            if (match) {
+                recordIndex = node.getIndexes().indexOf(index);
+                break;
             }
         }
 
-        System.out.println(matchingIndexes);
+        boolean match = true;
+        // Iterate over records beginning from the first matching index looking for more matches
+        while (match) {
+            for (int i = recordIndex; i < node.getIndexes().size(); i++) {
+                String [] searchTerms = searchText.split(" ");
+
+                // Search for each spaced separated string in the search string
+                for (String term : searchTerms) {
+                    if (!node.getIndexes().get(i).getIndex().contains(term)) {
+                        match = false;
+                        break;
+                    }
+                }
+
+                // If a match => add to matching index list
+                if (match) {
+                    matchingIndexes.add(node.getIndexes().get(i));
+                }
+            }
+
+            node = node.getNext();
+            recordIndex = 0;
+        }
+
+//        System.out.println(util.listToString(matchingIndexes));
+//        System.out.println(matchingIndexes.size());
     }
 
     private static void readRecordFromFile(int pageOffset, int recordOffset) {
@@ -199,13 +253,14 @@ public class tree {
         // Fetch input args
         String searchText = args[0];
         int pageSize = Integer.parseInt(args[1]);
+        String indexType = args[2];
         String heapFile = String.format("heap.%d", pageSize);
 
         // Start timer
         Instant start = Instant.now();
 
         // Build Tree
-        TreeNode rootNode = buildTree(heapFile, pageSize);
+        TreeNode rootNode = buildTree(heapFile, pageSize, indexType);
 
         //Search Tree
         searchTree(rootNode, searchText);

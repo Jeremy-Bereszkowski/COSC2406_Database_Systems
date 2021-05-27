@@ -15,6 +15,6 @@ public class DataIndex extends Index {
 
     @Override
     public String toString() {
-        return "\n\t\t\t" + super.getIndex() + ", pageOffset=" + pageOffset + ", recordOffset=" + recordOffset;
+        return super.getIndex() + ", pageOffset=" + pageOffset + ", recordOffset=" + recordOffset;
     }
 }

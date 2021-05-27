@@ -8,6 +8,12 @@ public class TreeNode extends Node {
     void addIndex(Index index) { this.indexes.add(index); }
     Boolean containsIndex(Index index) { return this.indexes.contains(index); }
     public List<Index> getIndexes() { return Collections.unmodifiableList(this.indexes); }
+
+    @Override
+    public Node getNext() {
+        return null;
+    }
+
     void removeIndex(Index index) { this.indexes.remove(index); }
 
     @Override

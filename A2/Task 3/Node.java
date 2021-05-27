@@ -17,4 +17,6 @@ public abstract class Node {
     }
 
     public abstract List<Index> getIndexes();
+
+    public abstract Node getNext();
 }

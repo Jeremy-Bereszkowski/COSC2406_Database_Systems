@@ -7,7 +7,7 @@ public class DataNode extends Node {
     private final List<DataIndex> indexes = new ArrayList<>();
     private DataNode next = null;
 
-    DataNode getNext() { return this.next; }
+    public DataNode getNext() { return this.next; }
     void resetNext() { this.next = null; }
     void setNext(DataNode next) { this.next = next; }
 
@@ -34,6 +34,13 @@ public class DataNode extends Node {
         string.append("\tchildren: {\n");
         for (Node child : super.getChildren()) {
             string.append("\t\tindexes: ").append(child.getIndexes()).append(",\n");
+        }
+        string.append("\t}\n");
+        string.append("\tnext: {\n");
+        if (next != null) {
+            for (Index index : next.getIndexes()) {
+                string.append("\t\tindexes: ").append(index).append(",\n");
+            }
         }
         string.append("\t}\n");
         string.append("}\n");
