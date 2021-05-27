@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 class dbload {
 
-    private static int RECORD_LENGTH = 56;
+    private static final int RECORD_LENGTH = 56;
 
     private static String dateTimeStampBuilder(char[] datetime) {
         if (datetime.length < 12)
@@ -82,21 +82,16 @@ class dbload {
                     recordCount++;
                 }
 
-                if ((records.size() + 1 > pageSize / RECORD_LENGTH) || scanner.hasNextLine() == false) {
-
-                    if (pageCount == 0) {
-                        writeFile(heapFile, records, pageSize, false);
-                    } else {
-                        writeFile(heapFile, records, pageSize, true);
-                    }
-
+                if ((records.size() + 1 > pageSize / RECORD_LENGTH) || !scanner.hasNextLine()) {
+                    System.out.println(util.listToString(records, 0));
+                    writeFile(heapFile, records, pageSize, pageCount != 0);
                     pageCount++;
                 }
             }
 
             // Write to stdout
-            System.out.println(String.format("Records read: %d", recordCount));
-            System.out.println(String.format("Page count: %d", pageCount));
+            System.out.printf("Records read: %d%n", recordCount);
+            System.out.printf("Page count: %d%n", pageCount);
 
         } catch (IOException e) {
             System.out.println("An error occurred.");
@@ -174,13 +169,10 @@ class dbload {
         HashMap<String, String> optsList = new HashMap<>();
 
         for (int i = 0; i < args.length; i++) {
-            switch (args[i].charAt(0)) {
-            case '-':
+            if (args[i].charAt(0) == '-') {
                 optsList.put(args[i++], args[i]);
-                break;
-            default:
+            } else {
                 optsList.put("file", args[i]);
-                break;
             }
         }
 
@@ -206,6 +198,6 @@ class dbload {
         long timeElapsed = Duration.between(start, Instant.now()).toMillis();
 
         // Write to stdout
-        System.out.println(String.format("Time to write: %dmS", timeElapsed));
+        System.out.printf("Time to write: %dmS%n", timeElapsed);
     }
 }

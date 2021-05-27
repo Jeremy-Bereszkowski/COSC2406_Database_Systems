@@ -20,13 +20,12 @@ public class TreeNode extends Node {
     public String toString() {
         StringBuilder string = new StringBuilder("TreeNode: {\n");
         string.append("\tindex: {\n");
-        for (Index index : indexes) {
-            string.append("\t\tindexes: \"").append(index.getIndex()).append("\",\n");
-        }
-        string.append("\t},\n");
+        string.append(util.listToString(indexes, 2));
+        string.append("\n\t},\n");
         string.append("\tchildren: {\n");
         for (Node child : super.getChildren()) {
-            string.append("\t\tindexes: ").append(child.getIndexes()).append(",\n");
+            string.append(util.listToString(child.getIndexes(), 3));
+            string.append('\n');
         }
         string.append("\t}\n");
         string.append("}\n");

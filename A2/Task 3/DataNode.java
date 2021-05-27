@@ -23,24 +23,40 @@ public class DataNode extends Node {
         public int compare(DataIndex a, DataIndex b) { return a.getIndex().compareTo(b.getIndex()); }
     }
 
+//    @Override
+//    public String toString() {
+//        StringBuilder string = new StringBuilder("DataNode: {\n");
+//        string.append("\tindex: {\n");
+//        for (Index index : indexes) {
+//            string.append("\t\tindexes: \"").append(index.getIndex()).append("\",\n");
+//        }
+//        string.append("\t},\n");
+//        string.append("\tchildren: {\n");
+//        for (Node child : super.getChildren()) {
+//            string.append("\t\tindexes: ").append(child.getIndexes()).append(",\n");
+//        }
+//        string.append("\t}\n");
+//        string.append("\tnext: {\n");
+//        if (next != null) {
+//            for (Index index : next.getIndexes()) {
+//                string.append("\t\tindexes: ").append(index).append(",\n");
+//            }
+//        }
+//        string.append("\t}\n");
+//        string.append("}\n");
+//        return string.toString();
+//    }
+
     @Override
     public String toString() {
         StringBuilder string = new StringBuilder("DataNode: {\n");
         string.append("\tindex: {\n");
-        for (Index index : indexes) {
-            string.append("\t\tindexes: \"").append(index.getIndex()).append("\",\n");
-        }
-        string.append("\t},\n");
+        string.append(util.listToString(indexes, 2));
+        string.append("\n\t},\n");
         string.append("\tchildren: {\n");
         for (Node child : super.getChildren()) {
-            string.append("\t\tindexes: ").append(child.getIndexes()).append(",\n");
-        }
-        string.append("\t}\n");
-        string.append("\tnext: {\n");
-        if (next != null) {
-            for (Index index : next.getIndexes()) {
-                string.append("\t\tindexes: ").append(index).append(",\n");
-            }
+            string.append(util.listToString(child.getIndexes(), 3));
+            string.append('\n');
         }
         string.append("\t}\n");
         string.append("}\n");
