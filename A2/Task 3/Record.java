@@ -25,16 +25,6 @@ public final class Record {
 
     public String getHourlyCounts() { return hourlyCounts; }
 
-    public static Comparator<Record> IndexDateTimeComparator = new Comparator<>() {
-        public int compare(Record i1, Record i2) {
-            return i1.getDateString().compareTo(i2.getDateString());
-        }};
-
-    public static Comparator<Record> IndexDateComparator = new Comparator<>() {
-        public int compare(Record i1, Record i2) {
-            return i1.getDateString().substring(0, 11).compareTo(i2.getDateString().substring(0, 11));
-        }};
-
     @Override
     public String toString() {
         return recordId +

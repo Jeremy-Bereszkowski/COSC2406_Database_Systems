@@ -1,3 +1,5 @@
+import java.util.Comparator;
+
 public class Index {
     private String index;
 
@@ -6,15 +8,8 @@ public class Index {
     }
 
     public String getIndex() { return index; }
-    public void setIndex(String index) { this.index = index; }
 
-    public String toString(Boolean newLine) {
-        StringBuilder string = new StringBuilder();
-        if (newLine) string.append('\n');
-        string.append("\t\t\t");
-        string.append(index);
-        return string.toString();
-    }
+    public static Comparator<Index> IndexComparator = (i1, i2) -> i1.getIndex().compareTo(i2.getIndex());
 
     @Override
     public String toString() {

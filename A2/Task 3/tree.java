@@ -15,22 +15,20 @@ public class tree {
         String month = date.substring(4, 6);
         String day = date.substring(6, 8);
         String hour = date.substring(8);
-        String twelveHour = "AM";
 
-        if (Integer.parseInt(hour) / 12 >= 1) {
-            hour = String.format("%02d", Integer.parseInt(hour) - 12);
-            twelveHour = "PM";
-        }
+        if (hour.equals("12")) hour = "00";
+        else if (hour.equals("24")) hour = "12";
 
-        return String.format("%s/%s/%s %s:00:00 %s", year, month, day, hour, twelveHour);
+        return String.format("%s/%s/%s %s:00:00", year, month, day, hour);
     }
 
     private static List<DataNode> readHeapFile(String fileName, int pageSize, String indexType) {
-        List<Record> records = new ArrayList<>();
+        List<DataIndex> indexes = new ArrayList<>();
 
         try {
             DataInputStream inputStream = new DataInputStream(new FileInputStream(fileName));
 
+            int pageCount = 0;
             // Read whole file
             while (inputStream.available() > 0) {
                 int bytesRead = 0;
@@ -58,9 +56,17 @@ public class tree {
                     String sensorName = new String(sensor_name, StandardCharsets.UTF_8);
                     String hourlyCounts = String.format("%d", inputStream.readInt());
 
-                    records.add(new Record(recordId, dateString, sensorId, sensorName, hourlyCounts));
+                    String index;
+                    if ("date".equals(indexType)) index = dateString.substring(0, 10);
+                    else if ("time".equals(indexType)) index = dateString.substring(11);
+                    else if ("datetime".equals(indexType)) index = dateString;
+                    else index = recordId.concat(dateString);
+
+                    indexes.add(new DataIndex(index, pageCount, bytesRead/RECORD_LENGTH));
 
                 } while ((bytesRead += RECORD_LENGTH) < pageSize && inputStream.available() > 0);
+
+                pageCount++;
             }
 
             inputStream.close();
@@ -68,22 +74,16 @@ public class tree {
             e.printStackTrace();
         }
 
-        records.sort(Record.IndexDateComparator);
+        //Sort all records by index
+        indexes.sort(Index.IndexComparator);
 
+        // Compile DataIndexes into Data Nodes
         List<DataNode> dataNodes = new ArrayList<>();
-
-        for (int i = 0; i < records.size(); ) {
+        for (int i = 0; i < indexes.size(); ) {
             DataNode node = new DataNode();
 
-            for (int j = 0; j < pageSize/RECORD_LENGTH && i < records.size(); i++, j++) {
-                String index;
-
-                if ("date".equals(indexType)) index = records.get(i).getDateString().substring(0, 10);
-                else if ("time".equals(indexType)) index = records.get(i).getDateString().substring(11);
-                else if ("datetime".equals(indexType)) index = records.get(i).getDateString();
-                else index = records.get(i).getRecordId().concat(records.get(i).getDateString());
-
-                node.addIndex(new DataIndex(index, dataNodes.size(), j));
+            for (int j = 0; j < pageSize/RECORD_LENGTH && i < indexes.size(); i++, j++) {
+                node.addIndex(indexes.get(i));
             }
 
             dataNodes.add(node);
@@ -159,7 +159,6 @@ public class tree {
 
         // Return root node
         return next.get(0);
-//        return null;
     }
 
     private static List<Index> searchTree(TreeNode rootNode, String searchText) {
@@ -199,7 +198,7 @@ public class tree {
         // If not matching index, return empty set
         if (startingIndex == -1) return matchingIndexes;
 
-        //Traverse nodes from starting index looking for matches
+        //  Traverse nodes from starting index looking for matches
         boolean match = true;
         while (match && node != null) {
             for (int i = startingIndex; i < node.getIndexes().size(); i++) {
@@ -221,7 +220,7 @@ public class tree {
 
         try {
             DataInputStream inputStream = new DataInputStream(new FileInputStream(fileName));
-            //Skip = PAGE_SIZE*PAGE_OFFSET + RECORD_SIZE*RECORD_OFFSET
+            // Skip = PAGE_SIZE*PAGE_OFFSET + RECORD_SIZE*RECORD_OFFSET
             inputStream.skipBytes(pageOffset*pageSize+recordOffset*RECORD_LENGTH);
 
             int record_id = inputStream.readInt();
@@ -255,27 +254,24 @@ public class tree {
         String heapFile = String.format("heap.%d", pageSize);
 
         // Start timer
-        Instant start = Instant.now();
+        Instant startBuild = Instant.now();
 
         // Build Tree
         TreeNode rootNode = buildTree(heapFile, pageSize, indexType);
+        System.out.printf("Time to build: %dmS%n", Duration.between(startBuild, Instant.now()).toMillis());
 
         // Search Tree
+        Instant startSearch = Instant.now();
         List<Index> matchingIndexes = searchTree(rootNode, searchText);
 
         // Read full records from file
         List<Record> matchingRecords = new ArrayList<>();
-        for (Index index : matchingIndexes) {
-            matchingRecords.add(readRecordFromFile(heapFile, ((DataIndex)index).getPageOffset(), ((DataIndex)index).getRecordOffset(), pageSize));
-        }
+        for (Index index : matchingIndexes) matchingRecords.add(readRecordFromFile(heapFile, ((DataIndex)index).getPageOffset(), ((DataIndex)index).getRecordOffset(), pageSize));
 
+        //Print matching records
         System.out.println(util.listToString(matchingRecords, 0));
 
-        // Stop timer
-        Instant finish = Instant.now();
-        long timeElapsed = Duration.between(start, finish).toMillis();
-
         // Write to stdout
-        System.out.printf("Time to search: %dmS%n", timeElapsed);
+        System.out.printf("Time to search: %dmS%n", Duration.between(startSearch, Instant.now()).toMillis());
     }
 }
