@@ -32,27 +32,25 @@ public class treeSearch {
             if (!updated) node = node.getChildren().get(node.getChildren().size()-1);
         }
 
+
         int startingIndex = -1;
-        //Get stating matching index
+        // Get index of first matching record
         for (Index index : node.getIndexes()) {
-            if (index.getIndex().equals(searchText)) {
+            if (index.getIndex().contains(searchText)) {
                 startingIndex = node.getIndexes().indexOf(index);
                 break;
             }
         }
 
-        // If not matching index, return empty set
+        // If no matching index, return empty set
         if (startingIndex == -1) return matchingIndexes;
 
-        //  Traverse nodes from starting index looking for matches
+        // Traverse nodes from starting index looking for matches
         boolean match = true;
         while (match && node != null) {
             for (int i = startingIndex; i < node.getIndexes().size(); i++) {
-                if (node.getIndexes().get(i).getIndex().equals(searchText)) {
-                    matchingIndexes.add(node.getIndexes().get(i));
-                } else {
-                    match = false;
-                }
+                if (node.getIndexes().get(i).getIndex().contains(searchText)) matchingIndexes.add(node.getIndexes().get(i));
+                else match = false;
             }
             node = node.getNext();
             startingIndex = 0;
@@ -245,6 +243,7 @@ public class treeSearch {
 
         // Write to stdout
         System.out.println(util.listToString(matchingRecords));
+        System.out.printf("Total records matched: %d%n", matchingRecords.size());
         System.out.printf("Time to build: %dmS%n", Duration.between(startBuild, endBuildStartSearch).toMillis());
         System.out.printf("Time to search: %dmS%n", Duration.between(endBuildStartSearch, endSearch).toMillis());
     }

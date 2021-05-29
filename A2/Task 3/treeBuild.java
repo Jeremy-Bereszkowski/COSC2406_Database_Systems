@@ -188,6 +188,8 @@ public class treeBuild {
         // Fetch input args
         int pageSize = Integer.parseInt(args[0]);
         String indexType = args[1];
+
+        // Construct file names
         String heapFile = String.format("heap.%d", pageSize);
         String treeFile = String.format("tree.%s.%d", indexType, pageSize);
 
@@ -197,10 +199,6 @@ public class treeBuild {
         // Build Tree
         TreeNode rootNode = buildTree(heapFile, pageSize, indexType);
         System.out.printf("Time to build: %dmS%n", Duration.between(startBuild, Instant.now()).toMillis());
-
-//        System.out.println(rootNode);
-//        System.out.println(rootNode.getChildren().get(0));
-//        System.out.println(rootNode.getChildren().get(0).getChildren().get(0));
 
         // Init page buffer
         page = new byte[pageSize];
