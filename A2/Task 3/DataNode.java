@@ -19,18 +19,18 @@ public class DataNode extends Node {
     public String toFlatString() {
         StringBuilder string = new StringBuilder();
         string.append(getId());
-        string.append("#");
+        string.append(util.NODE_FIELD_DELIMITER);
         string.append(1);
-        string.append("#");
+        string.append(util.NODE_FIELD_DELIMITER);
         for (DataIndex index : indexes) {
             string.append(index.getIndex());
-            string.append("%");
+            string.append(util.DATA_INDEX_FIELD_DELIMITER);
             string.append(index.getPageOffset());
-            string.append("%");
+            string.append(util.DATA_INDEX_FIELD_DELIMITER);
             string.append(index.getRecordOffset());
             string.append(" ");
         }
-        string.append("#");
+        string.append(util.NODE_FIELD_DELIMITER);
         for (Node child : getChildren()) {
             string.append(child.getId());
             string.append(" ");

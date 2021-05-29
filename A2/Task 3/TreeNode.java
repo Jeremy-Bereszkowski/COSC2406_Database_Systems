@@ -24,14 +24,14 @@ public class TreeNode extends Node {
     public String toFlatString() {
         StringBuilder string = new StringBuilder();
         string.append(getId());
-        string.append("#");
+        string.append(util.NODE_FIELD_DELIMITER);
         string.append(0);
-        string.append("#");
+        string.append(util.NODE_FIELD_DELIMITER);
         for (Index index : getIndexes()) {
             string.append(index.getIndex());
             string.append(" ");
         }
-        string.append("#");
+        string.append(util.NODE_FIELD_DELIMITER);
         for (Node child : getChildren()) {
             string.append(child.getId());
             string.append(" ");

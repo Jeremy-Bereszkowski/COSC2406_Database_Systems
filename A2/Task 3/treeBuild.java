@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class treeBuild {
-    private static final String RECORD_DELIMITER = "$";
     private static int NODE_ID_COUNT = 0;
     private static byte[] page;
     private static int pageByteCount = 0;
@@ -46,11 +45,15 @@ public class treeBuild {
                     String sensorName = new String(sensor_name, StandardCharsets.UTF_8);
                     String hourlyCounts = String.format("%d", inputStream.readInt());
 
+                    String date = dateString.substring(0, 10);
+                    String time = dateString.substring(11);
+
+                    // Build index
                     String index;
-                    if ("date".equals(indexType)) index = dateString.substring(0, 10);
-                    else if ("time".equals(indexType)) index = dateString.substring(11);
-                    else if ("datetime".equals(indexType)) index = dateString;
-                    else index = recordId.concat(dateString);
+                    if ("date".equals(indexType)) index = date;
+                    else if ("time".equals(indexType)) index = time;
+                    else if ("datetime".equals(indexType)) index = date.concat(util.INDEX_DELIMITER).concat(time);
+                    else index = recordId.concat(util.INDEX_DELIMITER).concat(date).concat(util.INDEX_DELIMITER).concat(time);
 
                     indexes.add(new DataIndex(index, pageCount, bytesRead/util.RECORD_LENGTH));
 
@@ -153,7 +156,7 @@ public class treeBuild {
 
     public static void traverse(Node root, String fileName, int pageSize) {
         // Convert node to bytes
-        byte[] nodeInBytes = RECORD_DELIMITER.concat(root.toFlatString()).concat(RECORD_DELIMITER).getBytes();
+        byte[] nodeInBytes = util.RECORD_DELIMITER.concat(root.toFlatString()).concat(util.RECORD_DELIMITER).getBytes();
 
         // If page doesn't have enough remaining space, write to file
         if (nodeInBytes.length >= pageSize - pageByteCount) writePage(fileName, pageSize);

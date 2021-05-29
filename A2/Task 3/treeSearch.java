@@ -101,12 +101,12 @@ public class treeSearch {
                 baos.write(inputStream.readByte());
                 char lastChar = baos.toString().charAt(baos.toString().length() - 1);
 
-                if (lastChar == '$') {
+                if (lastChar == util.RECORD_DELIMITER.charAt(0)) {
                     while (inputStream.available() > 0) {
                         baos.write(inputStream.readByte());
                         lastChar = baos.toString().charAt(baos.toString().length() - 1);
 
-                        if (lastChar == '$') break;
+                        if (lastChar == util.RECORD_DELIMITER.charAt(0)) break;
                     }
                 } else {
                     continue;
