@@ -9,7 +9,7 @@ public class Index {
 
     public String getIndex() { return index; }
 
-    public static Comparator<Index> IndexComparator = (i1, i2) -> i1.getIndex().compareTo(i2.getIndex());
+    public static Comparator<Index> IndexComparator = Comparator.comparing(Index::getIndex);
 
     @Override
     public String toString() {

@@ -4,14 +4,22 @@ import java.util.List;
 
 public abstract class Node {
     private final List<Node> children = new ArrayList<>();
+    private int id;
+
+    public Node(int id) {
+        this.id = id;
+    }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     void addChild(Node child) { this.children.add(child); }
     List<Node> getChildren() { return Collections.unmodifiableList(this.children); }
-    void removeChild(Node child) { this.children.remove(child); }
 
     @Override
     public String toString() {
         return "Node{" +
+                "id=" + id +
                 "children=" + children +
                 '}';
     }
@@ -19,4 +27,6 @@ public abstract class Node {
     public abstract List<Index> getIndexes();
 
     public abstract Node getNext();
+
+    public abstract String toFlatString();
 }

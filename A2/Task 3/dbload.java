@@ -13,8 +13,6 @@ import java.util.Scanner;
 
 class dbload {
 
-    private static final int RECORD_LENGTH = 56;
-
     private static String dateTimeStampBuilder(char[] datetime) {
         if (datetime.length < 12)
             return null;
@@ -82,8 +80,7 @@ class dbload {
                     recordCount++;
                 }
 
-                if ((records.size() + 1 > pageSize / RECORD_LENGTH) || !scanner.hasNextLine()) {
-                    System.out.println(util.listToString(records, 0));
+                if ((records.size() + 1 > pageSize / util.RECORD_LENGTH) || !scanner.hasNextLine()) {
                     writeFile(heapFile, records, pageSize, pageCount != 0);
                     pageCount++;
                 }
@@ -101,9 +98,7 @@ class dbload {
 
     private static int writeFile(String fileName, List<List<String>> records, int pageSize, Boolean append) {
         try {
-
             DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(fileName, append));
-
             int pageCount = 0;
 
             // Loop till all records written
@@ -114,7 +109,7 @@ class dbload {
                 pageCount++;
 
                 // Write records to page until page full or until all records written
-                while (k + RECORD_LENGTH < pageSize - 1 && records.size() > 0) {
+                while (k + util.RECORD_LENGTH < pageSize - 1 && records.size() > 0) {
 
                     List<String> record = records.remove(0);
 
@@ -180,10 +175,8 @@ class dbload {
     }
 
     public static void main(String[] args) {
-
         // Fetch input args
         HashMap<String, String> optsList = readArgs(args);
-
         int pageSize = Integer.parseInt(optsList.get("-p"));
         String dataFile = optsList.get("file");
         String heapFile = String.format("heap.%d", pageSize);
