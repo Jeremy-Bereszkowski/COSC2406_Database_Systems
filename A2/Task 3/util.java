@@ -11,7 +11,7 @@ public final class util {
 
     private static String tabString(int tabs) {
         StringBuilder string = new StringBuilder();
-        string.append("\t".repeat(Math.max(0, tabs)));
+        for (int i=0; i < tabs; i++) string.append("\t");
         return string.toString();
     }
 

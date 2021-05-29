@@ -29,7 +29,11 @@ public class treeBuild {
                     // If record_id is 0, rest of page is empty, read remaining empty bytes
                     if (record_id == 0) {
                         //Remaining bytes minus single int read for record_id
-                        inputStream.readNBytes(pageSize - bytesRead - 4);
+//                        inputStream.readNBytes(pageSize - bytesRead - 4);
+                        for (int i=0; i < pageSize - bytesRead - 4; i++) {
+                            inputStream.readByte();
+                        }
+
                         continue;
                     }
 
