@@ -140,7 +140,7 @@ public class treeBuild {
         List<DataNode> nodes = readHeapFile(fileName, pageSize, indexType);
 
         // Chain data nodes
-        chainDataNodes(nodes);
+//        chainDataNodes(nodes);
 
         // Build base layer of tree
         List<TreeNode> baseLayer = buildBase(nodes, pageSize);
