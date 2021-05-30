@@ -1,3 +1,5 @@
+import java.util.Comparator;
+
 public final class Record {
     private final String recordId;
     private final String dateString;

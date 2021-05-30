@@ -6,44 +6,15 @@ public class DataNode extends Node {
     private final List<DataIndex> indexes = new ArrayList<>();
     private DataNode next = null;
 
-    public DataNode(int id) {
-        super(id);
-    }
-
     public DataNode getNext() { return this.next; }
     void setNext(DataNode next) { this.next = next; }
 
     void addIndex(DataIndex index) { this.indexes.add(index); }
     public List<Index> getIndexes() { return Collections.unmodifiableList(this.indexes); }
 
-    public String toFlatString() {
-        StringBuilder string = new StringBuilder();
-        string.append(getId());
-        string.append(util.NODE_FIELD_DELIMITER);
-        string.append(1);
-        string.append(util.NODE_FIELD_DELIMITER);
-        for (DataIndex index : indexes) {
-            string.append(index.getIndex());
-            string.append(util.DATA_INDEX_FIELD_DELIMITER);
-            string.append(index.getPageOffset());
-            string.append(util.DATA_INDEX_FIELD_DELIMITER);
-            string.append(index.getRecordOffset());
-            string.append(" ");
-        }
-        string.append(util.NODE_FIELD_DELIMITER);
-        for (Node child : getChildren()) {
-            string.append(child.getId());
-            string.append(" ");
-        }
-        return string.toString();
-    }
-
     @Override
     public String toString() {
         StringBuilder string = new StringBuilder("DataNode: {\n");
-        string.append("\tid: ");
-        string.append(getId());
-        string.append(",\n");
         string.append("\tindex: {\n");
         string.append(util.listToString(indexes, 2));
         string.append("\n\t},\n");

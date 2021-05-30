@@ -1,5 +1,5 @@
 public class DataIndex extends Index  {
-    private final int pageOffset, recordOffset;
+    private int pageOffset, recordOffset;
 
     DataIndex(String index, int pageOffset, int recordOffset) {
         super(index);
